@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model content_suggestion {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  suggestion      String
+  pencraft_pro_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @default(now()) @db.Timestamp(6)
+  pencraft_pro    pencraft_pro @relation(fields: [pencraft_pro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model integration {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  platform        String       @db.VarChar(255)
+  api_key         String       @db.VarChar(255)
+  pencraft_pro_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @default(now()) @db.Timestamp(6)
+  pencraft_pro    pencraft_pro @relation(fields: [pencraft_pro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model keyword {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  keyword         String       @db.VarChar(255)
+  pencraft_pro_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @default(now()) @db.Timestamp(6)
+  pencraft_pro    pencraft_pro @relation(fields: [pencraft_pro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pencraft_pro {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String               @db.VarChar(255)
+  user_id            String               @db.Uuid
+  created_at         DateTime             @default(now()) @db.Timestamp(6)
+  updated_at         DateTime             @default(now()) @db.Timestamp(6)
+  content_suggestion content_suggestion[]
+  integration        integration[]
+  keyword            keyword[]
+  user               user                 @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  performance        performance[]
+}
+
+model performance {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_engagement Int
+  seo_score       Int
+  pencraft_pro_id String       @db.Uuid
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime     @default(now()) @db.Timestamp(6)
+  pencraft_pro    pencraft_pro @relation(fields: [pencraft_pro_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model user {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String         @unique @db.VarChar(255)
+  firstName    String?        @db.VarChar(255)
+  lastName     String?        @db.VarChar(255)
+  roq_user_id  String         @db.VarChar(255)
+  tenant_id    String         @db.VarChar(255)
+  pencraft_pro pencraft_pro[]
+}
